@@ -1,0 +1,10 @@
+version: '2'
+
+services:
+  lks_binex__makan_pie:
+    build: .
+    container_name: lks_binex__makan_pie
+    restart: on-failure
+    ports:
+      - "35002:9999"
+

@@ -1,0 +1,10 @@
+version: '2'
+
+services:
+  lks_binex__canary_pelindung_dunia:
+    build: .
+    container_name: lks_binex__canary_pelindung_dunia
+    restart: on-failure
+    ports:
+      - "35001:9999"
+

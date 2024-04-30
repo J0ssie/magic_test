@@ -1,0 +1,17 @@
+# Gunakan image PHP 8.0 Apache sebagai base image
+FROM php:8.0-apache
+
+# Buat pengguna non-root
+RUN useradd -m myuser
+
+# Salin file PHP ke dalam direktori root web server
+COPY . /var/www/html
+
+# Salin file php.ini untuk disable function ke dalam container
+COPY php.ini /usr/local/etc/php/php.ini
+
+# Set owner dan izin file
+RUN chown -R myuser:myuser /var/www/html && \
+    chmod -R 755 /var/www/html && \
+    chown -R www-data:www-data /var/www/html/uploads && \
+    chmod -R 755 /var/www/html/uploads
