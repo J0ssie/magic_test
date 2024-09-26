@@ -1,0 +1,84 @@
+services:
+  # mysqldb:
+  #   platform: linux/x86_64
+  #   image: mysql:8.0
+  #   container_name: mysqldb
+  #   restart: unless-stopped
+  #   env_file: ./.env
+  #   environment:
+  #     - MYSQL_ROOT_PASSWORD=$MYSQLDB_ROOT_PASSWORD
+  #     - MYSQL_DATABASE=$MYSQLDB_DATABASE
+  #   ports:
+  #     - $MYSQLDB_LOCAL_PORT:$MYSQLDB_DOCKER_PORT
+  #   volumes:
+  #     - web3db:/var/lib/mysql
+  #   networks:
+  #     - web3
+
+  # mailpit:
+  #   image: axllent/mailpit
+  #   container_name: mailpit
+  #   restart: unless-stopped
+  #   volumes:
+  #     - ./data:/data
+  #   ports:
+  #     - 8025:8025
+  #     - 1025:1025
+  #   environment:
+  #     MP_MAX_MESSAGES: 5000
+  #     MP_DATABASE: /data/mailpit.db
+  #     MP_SMTP_AUTH_ACCEPT_ANY: 1
+  #     MP_SMTP_AUTH_ALLOW_INSECURE: 1
+  #   networks:
+  #     - web3
+
+  web:
+    container_name: web
+    # depends_on:
+    #   - mysqldb
+    build: ./web
+    restart: unless-stopped
+    env_file: web/.env
+    ports:
+      - $NODE_LOCAL_PORT:$NODE_CONTAINER_PORT
+    enviroment:
+      - PORT=$NODE_CONTAINER_PORT
+    links:
+      - api
+    networks:
+      - web3
+
+  api:
+    container_name: api
+    build:
+        context: ./api/vendor/laravel/sail/runtimes/8.2
+        dockerfile: Dockerfile
+        args:
+            WWWGROUP: '${WWW_GROUP}'
+    extra_hosts:
+        - 'host.docker.internal:host-gateway'
+    ports:
+        - '${API_PORT:-80}:80'
+    environment:
+        WWWUSER: '${WWW_USER}'
+        LARAVEL_SAIL: 1
+        XDEBUG_MODE: '${SAIL_XDEBUG_MODE:-off}'
+        XDEBUG_CONFIG: '${SAIL_XDEBUG_CONFIG:-client_host=host.docker.internal}'
+        IGNITION_LOCAL_SITES_PATH: '${PWD}'
+        TZ: 'Asia/Jakarta'
+    volumes:
+        - './api:/var/www/html'
+    # depends_on:
+    #   - mysqldb
+    #   - mailpit
+    links:
+      - mailpit
+    networks:
+        - web3
+
+
+volumes: 
+  web3db:
+
+networks:
+  web3:
